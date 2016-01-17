@@ -8,7 +8,7 @@ class Person
     help= "******* These are the methdos allowed for Person *******\n
      Create new Person -> p -create <firstname> <lastname> <birthdate{yyyy-MM-dd}> <email> <fiscalcode> <gender>
      \nView person Detail -> p -show
-     \nDelete a person -> p -delete
+     \nDelete a person -> pDelete <id>
      \nView currentHealth -> p -show h
      \nView list of measure -> p -show list measure
      \nShow measure -> p -show m<1>
@@ -25,6 +25,24 @@ class Person
     help
   end
 
+
+  #RestClient.post "http://example.com/resource", { 'x' => 1 }.to_json, :content_type => :json, :accept => :json
+  public
+  def createPerson(firstname,lastname,birthdate,email,fiscalcode,gender)
+    addr = @bls_addr.to_s
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the create Person !!! "
+    sez = {'firstname' => firstname,'lastname' => lastname,'birthdate' => birthdate,'email' => email,'fiscalcode' => fiscalcode,'gender' => gender}
+    puts sez
+    response = RestClient.post addr.to_s, {'firstname' => firstname,'lastname' => lastname,'birthdate' => birthdate,'email' => email,'fiscalcode' => fiscalcode,'gender' => gender}.to_json,
+                               :content_type => :json, :accept => 'text/plain'
+    #puts respose.request
+    #puts response
+    #person = JSON.parse(response)
+    #puts person
+  end
+
   public
   def viewPerson(personId)
     addr = @bls_addr.to_s + personId.to_s
@@ -36,6 +54,40 @@ class Person
     text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
     return text
   end
+
+
+  public
+  def deletePerson(personId)
+    addr = @bls_addr.to_s + personId.to_s
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the method deletePerson !!! "
+    response = RestClient.delete addr
+    #person = JSON.parse(response)
+    #text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
+    #return text
+  end
+
+
+#https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/person_id/weather?city=city&units=units&mode=mode
+  #RestClient.get 'http://example.com/resource', :params => {:foo => 'bar', :baz => 'qux'}
+  # will GET http://example.com/resource?foo=bar&baz=qux
+  public
+  def getWeather(personId,city,units,mode)
+
+    addr = @bls_addr.to_s + personId.to_s+"/weather"
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the method getWeather !!! "
+    response = RestClient.get addr, :params => {:city => city, :units => units, :mode => mode}
+    weather = JSON.parse(response)
+    text = " Condition: "+weather['Condition']+"\n Current Temperature: "+weather['Motivation']+ "\n Temperature max: "+ weather['Temperature max']+"\n Temperature min: " +weather['Temperature min']+"\n Pressure "+weather['Pressure']
+    return text
+  end
+
+
+
+
 
   def bls_addr
     @bls_addr
