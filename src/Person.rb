@@ -101,12 +101,29 @@ class Person
     addr = @bls_addr.to_s + personId.to_s+"/reminder"
     #@bls_addr.to_s+personId.to_s
     puts addr
-    puts "Inside the method viewPerson !!! "
+    puts "Inside the method showReminder !!! "
     response = RestClient.get addr
-    person = JSON.parse(response)
+    if response.code == 200
+      reminder_list = JSON.parse(response)
+      x = reminder_list['reminder']
+      #pp x
+      text = "Ciao "
 
-    text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
-    return text
+      if !x.empty?
+        text_one = x[0]['text'].to_s
+        expire_one = x[0]['expireReminder']
+        text_two = x[1]['text'].to_s
+        expire_two = x[1]['expireReminder']
+
+        text_reminder = "Reminders\n"+"\n Expire data Reminder: "+expire_one+"\n Motivation phrase: "+text_one+"\n\n Expire data Reminder: "+expire_two+"\n Motivational phrase: "+text_two
+      else
+        text_reminder = "There are not reminders"
+      end
+    else
+      text_reminder = "Error"
+    end
+
+    return text_reminder
   end
 
 
@@ -140,8 +157,38 @@ class Person
   end
 
 
+  public
+  def getMotivation(personId)
+    addr = @bls_addr.to_s + personId.to_s+"/motivation"
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the method viewPerson !!! "
+    response = RestClient.get addr
+
+    #person = JSON.parse(response)
+    #text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
+    return response
+  end
 
 
+  public
+  def currentHealth(personId)
+    addr = @bls_addr.to_s + personId.to_s+"/currentHealth"
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the method viewPerson !!! "
+    response = RestClient.get addr
+    person = JSON.parse(response)
+    x=person['measure']
+    text = " "
+    x.each do |el|
+      text << "\n Measure: "+el['measureDefinition']['measureName']+"\n Value: "+el['value']+"\n"
+    end
+
+
+    #text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
+    return text
+  end
 
 
   def bls_addr
