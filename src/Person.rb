@@ -190,6 +190,20 @@ class Person
     return text
   end
 
+  def showListTarget(personId)
+    addr = @bls_addr.to_s + personId.to_s+"/target"
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    response = RestClient.get addr
+    result = JSON.parse(response)
+    x=result['target']
+    text = " "
+    x.each do |el|
+      text << "\n Target: "+el['measureDefinition']['measureName']+"\n Value: "+el['value'].to_s + " \n "
+    end
+
+    return text
+  end
 
   def bls_addr
     @bls_addr

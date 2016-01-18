@@ -87,7 +87,7 @@
            obj_person = Person.new()
            text = obj_person.viewPerson($id_Person)
            puts text.to_s
-           kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+           kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
            bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
         end
 
@@ -253,7 +253,7 @@
           obj_person = Person.new()
           text = obj_person.getWeather(id,city,$units,$mode)
           puts text.to_s
-          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
           bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
         end
 
@@ -288,7 +288,7 @@
           puts 'showTarget...'
           obj_person = Person.new
           kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
-          bot.api.send_message(chat_id: message.chat.id, text: obj_person.ShowListTarget($id_Doctor), reply_markup: kb)
+          bot.api.send_message(chat_id: message.chat.id, text: obj_person.showListTarget($id_Person), reply_markup: kb)
         end
 
       #####################LOGIN########################
@@ -327,8 +327,9 @@
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         else
           welcome_person = "Push getInfo button to receive last info about you"
-          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [['GetInfo', 'p -show', '/help -p', 'p -currentHealth'], 
-                                                                                ['showTarget', 'showReminder', 'p -getMotivation', 'pWeather'], one_time_keyboard: false)
+          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [['GetInfo', '/help -p'], 
+                                                                                ['showTarget', 'showReminder',  'p -show'],
+                                                                                ['p -getMotivation', 'p -currentHealth']], one_time_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
