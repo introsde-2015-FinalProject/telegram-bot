@@ -72,6 +72,7 @@
         end
 
       #Create new person
+      #p -create Jack Lambert 2000-12-10 hgjfoe@hotmail.com fiscalcode M
       when /p\s-create/
         b=message.text.gsub(/\s+/m, ' ').strip.split(" ")
         puts b.size
@@ -104,6 +105,69 @@
         else
            puts "You just making it up!"
         end
+
+    #Create new person
+      #p -createReminder false 2000-12-10 2000-12-10 3 sometext
+      when /p\s-cReminder/
+        #id = grade.match(/\d+/)[0].to_i
+        if $id_Person === 0
+          $id_Person = 1
+        end
+        b=message.text.gsub(/\s+/m, ' ').strip.split(" ")
+        puts "Size of b "+b.size.to_s
+        size_b = b.size
+        #size_b_text = size_b-1
+        autocreate = b[2]
+        createReminder = b[3]
+        expireReminder = b[4]
+        relevanceLevel = b[5]
+        for i in 6..size_b-1 do
+          text = text.to_s+" "+b[i]
+        end
+        #text = b[6]
+        puts text
+
+        puts autocreate
+        puts createReminder
+        puts expireReminder
+        puts relevanceLevel
+        puts text
+        obj_person = Person.new()
+        text = obj_person.createReminder($id_Person,autocreate,createReminder,expireReminder,relevanceLevel,text)
+        puts "Response of method post in bot: "+ text.to_s
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+        bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
+
+
+    #Create new person
+    #p -cTarget false < 2016-10-10 1 2016-02-01 70
+        when /p\s-cTarget/
+          #id = grade.match(/\d+/)[0].to_i
+          if $id_Person == 0
+            $id_Person = 1
+          end
+          b=message.text.gsub(/\s+/m, ' ').strip.split(" ")
+          puts "Size of b "+b.size.to_s
+          size_b = b.size
+          #size_b_text = size_b-1
+          achieved = b[2]
+          conditionTarget = b[3]
+          endDateTarget = b[4]
+          idMeasureDef = b[5]
+          startDataTarget = b[6]
+          value = b[7]
+
+          puts achieved
+          puts conditionTarget
+          puts endDateTarget
+          puts idMeasureDef
+          puts startDataTarget
+          puts value
+          obj_person = Person.new()
+          text = obj_person.createTarget($id_Person,achieved,conditionTarget,endDateTarget,idMeasureDef,startDataTarget,value)
+          puts "Response of method post in bot: "+ text.to_s
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+          bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
 
 
     #Delete Person

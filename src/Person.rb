@@ -1,6 +1,7 @@
 class Person
   def initialize
     @bls_addr = "https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/"
+    @bls_addr_measure = "https://bls-desolate-falls-2352.herokuapp.com/sdelab/measureDefinition"
   end
 
 
@@ -36,6 +37,46 @@ class Person
     sez = {'firstname' => firstname,'lastname' => lastname,'birthdate' => birthdate,'email' => email,'fiscalcode' => fiscalcode,'gender' => gender}
     puts sez
     response = RestClient.post addr.to_s, {'firstname' => firstname,'lastname' => lastname,'birthdate' => birthdate,'email' => email,'fiscalcode' => fiscalcode,'gender' => gender}.to_json,
+                               :content_type => :json, :accept => 'application/json'
+    #puts respose.request
+    #puts response
+    #person = JSON.parse(response)
+    #puts person
+  end
+
+  public
+  def createReminder(personId,autocreate,createReminder,expireReminder,relevanceLevel,text)
+    addr = @bls_addr.to_s+personId.to_s+"/reminder"
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the create Reminder !!! "
+    sez = {'autocreate' => autocreate,'createReminder' => createReminder,'expireReminder' => expireReminder,'relevanceLevel' => relevanceLevel,'text' => text}
+    puts sez
+    response = RestClient.post addr.to_s, {'autocreate' => autocreate,'createReminder' => createReminder,'expireReminder' => expireReminder,'relevanceLevel' => relevanceLevel,'text' => text}.to_json,
+                               :content_type => :json, :accept => 'text/plain'
+    #puts respose.request
+    #puts response
+    #person = JSON.parse(response)
+    #puts person
+  end
+
+  public
+  def createTarget(personId,achieved,conditionTarget,endDateTarget,idMeasureDef,startDataTarget,value)
+    addr = @bls_addr.to_s+personId.to_s+"/target"
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the create Target !!! "
+    puts "Calling MeasureDefinition to retrive the json object in order to create a Target"
+    #addr_measureDef = @bls_addr.to_s+"measureDefinition"
+    addr_measureDef = @bls_addr_measure
+    puts "addr_measuredef: "+addr_measureDef.to_s
+    response_measureDef = RestClient.get addr_measureDef, :params => {:measure => idMeasureDef}
+    #puts "Response measureDef inside createTarget"+response_measureDef
+    measure_json = JSON.parse(response_measureDef)
+    puts "Measure_json "+measure_json.to_json
+    sez = {'achieved' => achieved,'conditionTarget' => conditionTarget,'endDateTarget' => endDateTarget,'measureDefinition' => measure_json,'startDateTarget' => startDataTarget,'value' => value}
+    puts sez
+    response = RestClient.post addr.to_s, {'achieved' => achieved,'conditionTarget' => conditionTarget,'endDateTarget' => endDateTarget,'measureDefinition' => measure_json,'startDateTarget' => startDataTarget,'value' => value}.to_json,
                                :content_type => :json, :accept => 'text/plain'
     #puts respose.request
     #puts response
@@ -51,6 +92,19 @@ class Person
     puts "Inside the method viewPerson !!! "
     response = RestClient.get addr
     person = JSON.parse(response)
+    text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
+    return text
+  end
+
+  public
+  def showReminder(personId)
+    addr = @bls_addr.to_s + personId.to_s+"/reminder"
+    #@bls_addr.to_s+personId.to_s
+    puts addr
+    puts "Inside the method viewPerson !!! "
+    response = RestClient.get addr
+    person = JSON.parse(response)
+
     text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
     return text
   end
@@ -84,6 +138,7 @@ class Person
     text = " Condition: "+weather['Condition']+"\n Current Temperature: "+weather['Motivation']+ "\n Temperature max: "+ weather['Temperature max']+"\n Temperature min: " +weather['Temperature min']+"\n Pressure "+weather['Pressure']
     return text
   end
+
 
 
 
