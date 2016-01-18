@@ -184,6 +184,41 @@
           bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
         end
 
+    #Show Reminder
+      when /p\s-showReminder/
+        if $id_Person == 0
+          $id_Person = 1
+        end
+
+        obj_person = Person.new()
+        text = obj_person.showReminder($id_Person)
+        puts text.to_s
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+        bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
+
+    #Get Motivation Phrase
+      when /p\s-getMotivation/
+        if $id_Person == 0
+          $id_Person = 1
+        end
+
+        obj_person = Person.new()
+        text = obj_person.getMotivation($id_Person)
+        puts text.to_s
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+        bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
+
+    #Get Motivation Phrase
+        when /p\s-currentHealth/
+          if $id_Person == 0
+            $id_Person = 1
+          end
+
+          obj_person = Person.new()
+          text = obj_person.currentHealth($id_Person)
+          puts text.to_s
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+          bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
 
     #show weather
       when /pWeather \S*/
