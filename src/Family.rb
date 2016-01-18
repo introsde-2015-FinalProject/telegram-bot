@@ -1,49 +1,57 @@
 class Family
   def initialize
-    @bls_addr = "https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/"
+    @bls_addr = "https://bls-desolate-falls-2352.herokuapp.com/sdelab/family/"
   end
 
 
   def help()
-    help= "******* These are the methdos allowed for Person *******\n
-     Create new Person -> p -create <firstname> <lastname> <birthdate{yyyy-MM-dd}> <email> <fiscalcode> <gender>
-     \nView person Detail -> p -show
-     \nDelete a person -> p -delete
-     \nView currentHealth -> p -show h
-     \nView list of measure -> p -show list measure
-     \nShow measure -> p -show m<1>
-     \nCheck measure -> p -m<1>
-     \nCreate new Reminder -> p -create reminder <autocreate{false}> <createReminder{yyyy-MM-dd}> <expireReminder{yyyy-MM-dd}> <relevanceLevel{1-5}> <text>
-     \nShow Person reminders -> p -show reminder
-     \nCreate new target -> p -create target <achieved{false}> <conditionTarget{<,>}> <endDateTarget{yyyy-MM-dd}> <startDateTarget{yyyy-MM-dd}>
-     \nShow target list -> p -show target
-     \nShow list target for measureDef -> p -show target -m<1>
-     \nCheck vital signs -> p -m<1> <value> <endvalue> <startvalue>
-     \nGet motivation phrase -> p -motivation
-     \nGet daily weather information -> p -weather <city,nation> <metric> <json>
-     \nGet forecast weather information -> -forecast <city,nation> <metric> <json>"
+    help= "******* These are the methdos allowed for Family *******\n
+    \nVisualize data of the family member -> visualize_data
+    \nGet alarms -> receive_allarm"
     help
   end
 
-  public
-  def viewPerson(personId)
-    addr = @bls_addr.to_s + personId.to_s
-    #@bls_addr.to_s+personId.to_s
-    puts addr
-    puts "Inside the method viewPerson !!! "
+  def getAlarms (familyId)
+    addr = @bls_addr.to_s + familyId.to_s + '/person/alarm'
+    puts 'getAlarms: ' + addr
     response = RestClient.get addr
-    person = JSON.parse(response)
-    text = "Firstname: "+person['firstname']+"\n Lastname: "+person['lastname']+ "\n Birthdate: "+ person['birthdate']+"\n Gender: "+person['gender']
-    return text
-  end
+    if response.code == 200
+      alarm = JSON.parse(response)
+      text = "Blood pressure max: "+alarm['Blood pressure max'].to_s+"\n 
+      "+alarm['Message'].to_s+ "\n 
+      Blood pressure min: "+ alarm['Blood pressure min'].to_s
+    else
+     text = "error in server"
+   end
+   return text
+ end
 
-  def bls_addr
-    @bls_addr
-  end
+ def visualizeData (familyId)
+   addr = @bls_addr.to_s + familyId.to_s + '/person/measures'
+   puts 'getAlarms: '+ addr
+   response = RestClient.get addr
+   if response.code == 200
+     measures = JSON.parse(response)
+     pp measures
+     array = measures['measure']
+     text = ""
+     array.each do |x|
+      text << x['measureDefinition']['measureName'] + ' = ' + x['value'].to_s + ' at ' + x['timestamp']+ "\n"
+    end
+  else
+   text = "error in server"
+ end
+ return text
+end
 
-  def bls_addr=(bls)
-    @bls_addr=bls
-  end
+
+def bls_addr
+  @bls_addr
+end
+
+def bls_addr=(bls)
+  @bls_addr=bls
+end
 
 
 end

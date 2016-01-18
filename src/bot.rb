@@ -4,8 +4,11 @@
 	require 'rest-client'
 	require 'pp'
   require_relative 'Person'
+  require_relative 'Doctor'
+  require_relative 'Family'
 
-	token = '177899404:AAGAOaYV8QXTFIkQTRsPTxaBcAlA-Upb31g'
+	#token = '177899404:AAGAOaYV8QXTFIkQTRsPTxaBcAlA-Upb31g' #lifecoach
+  token = '160006993:AAGLTK3ZWLi4iHTMzZrNzSqVkQ9kkJSL5iA' # andrea
   $id_Person = 0
   $id_Doctor = 0
   $id_Family = 0
@@ -13,6 +16,7 @@
   $mode = "json"
   $units = "metric"
 
+  puts 'Starting the bot...'
   # *************** PCS ********************
   #******** GET PCS *********
   #RestClient.get 'http://example.com/resource', :params => {:foo => 'bar', :baz => 'qux'}
@@ -148,13 +152,13 @@
             bot.api.send_message(chat_id: message.chat.id, text: ask_id, reply_markup: kb)
             #x = 'u'
 
-          when 'Family'
+          when 'Doctor'
             ask_id = "Welcome Doctor: insert your d=<id_number>"
             kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
             bot.api.send_message(chat_id: message.chat.id, text: ask_id, reply_markup: kb)
             #x = 'f'
 
-          when 'Doctor'
+          when 'Family'
             ask_id = "Welcome Faamily: insert your f=<id_number>"
             kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
             bot.api.send_message(chat_id: message.chat.id, text: ask_id, reply_markup: kb)
@@ -180,7 +184,7 @@
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
-      when /d= \d+/
+      when /d=\d+/
         id = message.text.match(/\d+/)[0].to_i
         $id_Doctor = id
         puts "Id doctor: " + $id_Doctor.to_s
@@ -190,12 +194,12 @@
           error_message = "Wrong id... Please reinsert your id: "
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         else
-          welcome_person = "Push getInfo button to receive last info about you"
-          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(GetInfo)], one_time_keyboard: true)
+          welcome_person = "Choose an action!"
+          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(CheckPatient), %w(list_patients)], one_time_keyboard: true)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
-      when /f= \d+/
+      when /f=\d+/
         id = message.text.match(/\d+/)[0].to_i
         $id_Family = id
         puts "Id family: " + $id_Family.to_s
@@ -205,8 +209,8 @@
           error_message = "Wrong id... Please reinsert your id: "
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         else
-          welcome_person = "Push getInfo button to receive last info about you"
-          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(GetInfo)], one_time_keyboard: true)
+          welcome_person = "Choose an action"
+          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(visualize_data), %w(receive_allarm)], one_time_keyboard: true)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
@@ -236,6 +240,55 @@
 				kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
 				text = 'Hi '+person['firstname']+' '+person['lastname']+', how are you?'
 				bot.api.send_message(chat_id: message.chat.id, text: text , reply_markup: kb)
+
+      #***************FAMILY****************
+      when 'visualize_data'
+        if $id_Family != 0
+            puts 'visualize_data'
+            obj_family = Family.new
+            obj_family.visualizeData($id_Family)
+            kb = answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(visualize_data), %w(receive_allarm)], one_time_keyboard: true)
+            bot.api.send_message(chat_id: message.chat.id, text: obj_family.visualizeData($id_Family), reply_markup: kb)        
+        end
+
+      when 'receive_allarm'
+        if $id_Family != 0
+            puts 'receive_allarm...'
+            obj_family = Family.new
+            obj_family.getAlarms($id_Family)
+            kb = answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(visualize_data), %w(receive_allarm)], one_time_keyboard: true)
+            bot.api.send_message(chat_id: message.chat.id, text: obj_family.getAlarms($id_Family), reply_markup: kb)
+        end
+
+      #***************DOCTOR****************
+
+      when 'list_patients'
+        if $id_Doctor != 0
+          puts 'list_patients...'
+          obj_doctor = Doctor.new
+          kb = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(CheckPatient), %w(list_patients)], one_time_keyboard: true)
+          bot.api.send_message(chat_id: message.chat.id, text: obj_doctor.getListPatients($id_Doctor), reply_markup: kb)
+        end
+
+      when 'CheckPatient'
+        if $id_Doctor != 0
+          puts 'CheckPatient...'
+          text = "Insert 'check <id_patient>'"
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+          bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
+        end
+
+      when /check \d+/
+        if $id_Doctor != 0
+            puts 'd -check'
+            idp = message.text.match(/\d+/)[0].to_i
+            obj_doctor = Doctor.new
+            obj_doctor.checkPatient($id_Doctor, idp)
+            kb = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(CheckPatient), %w(list_patients)], one_time_keyboard: true)
+            bot.api.send_message(chat_id: message.chat.id, text: obj_doctor.checkPatient($id_Doctor, idp), reply_markup: kb)        
+        end
+
+
 			else
 				bot.api.send_message(chat_id: message.chat.id, text: 'Sorry, I did not understand', reply_markup: kb)
 			end
