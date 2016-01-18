@@ -205,7 +205,7 @@
         end
 
     #Show Reminder
-      when /p\s-showReminder/
+      when /showReminder/
         if $id_Person == 0
           $id_Person = 1
         end
@@ -213,7 +213,7 @@
         obj_person = Person.new()
         text = obj_person.showReminder($id_Person)
         puts text.to_s
-        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
         bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
 
     #Get Motivation Phrase
@@ -225,7 +225,7 @@
         obj_person = Person.new()
         text = obj_person.getMotivation($id_Person)
         puts text.to_s
-        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
         bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
 
     #Get Motivation Phrase
@@ -237,7 +237,7 @@
           obj_person = Person.new()
           text = obj_person.currentHealth($id_Person)
           puts text.to_s
-          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
 
     #show weather
@@ -253,7 +253,7 @@
           obj_person = Person.new()
           text = obj_person.getWeather(id,city,$units,$mode)
           puts text.to_s
-          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
         end
 
@@ -283,11 +283,11 @@
         text = 'Hi '+person['firstname']+' '+person['lastname']+', how are you?'
         bot.api.send_message(chat_id: message.chat.id, text: text , reply_markup: kb)
 
-      when 'ShowListTarget'
+      when 'showTarget'
         if $id_Person != 0
-          puts 'ShowListTarget...'
+          puts 'showTarget...'
           obj_person = Person.new
-          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: obj_person.ShowListTarget($id_Doctor), reply_markup: kb)
         end
 
@@ -327,7 +327,8 @@
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         else
           welcome_person = "Push getInfo button to receive last info about you"
-          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [['GetInfo', 'p -show', '/help -p'], ['ShowListTarget', ''], one_time_keyboard: false)
+          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [['GetInfo', 'p -show', '/help -p', 'p -currentHealth'], 
+                                                                                ['showTarget', 'showReminder', 'p -getMotivation', 'pWeather'], one_time_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
