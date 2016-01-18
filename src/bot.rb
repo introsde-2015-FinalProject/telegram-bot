@@ -41,6 +41,9 @@
 		bot.listen do |message|
 			case message.text
 
+
+      #*************START-STOP**************** 
+
 			when '/start'
 				question = 'Welcome, who are you?'
 					# See more: https://core.telegram.org/bots/api#replykeyboardmarkup
@@ -48,20 +51,33 @@
 
 					bot.api.send_message(chat_id: message.chat.id, text: question, reply_markup: answers)
 
-
-
 			when '/stop'
 					# See more: https://core.telegram.org/bots/api#replykeyboardhide
 					kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
 					bot.api.send_message(chat_id: message.chat.id, text: 'Sorry to see you go :(', reply_markup: kb)
 
+      #**************HELP**********************
+
       when '/help -p'
          obj_person = Person.new
          obj_person.help()
-         kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+         kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
          bot.api.send_message(chat_id: message.chat.id, text: obj_person.help(), reply_markup: kb)
 
-    #Person calls
+      when '/help -f'
+         obj_family = Family.new
+         obj_family.help()
+         kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+         bot.api.send_message(chat_id: message.chat.id, text: obj_family.help(), reply_markup: kb)
+
+      when '/help -d'
+         obj_doctor = Doctor.new
+         obj_doctor.help()
+         kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+         bot.api.send_message(chat_id: message.chat.id, text: obj_doctor.help(), reply_markup: kb)
+
+      #************PERSON****************************
+
       #show person detail
       when 'p -show'
         puts "Id person inside if p -show "+$id_Person.to_s
@@ -206,7 +222,41 @@
           bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
         end
 
+       when 'Person'
+        welcome_person = "Push getInfo button to receive last info about you"
+        answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(GetInfo)], one_time_keyboard: true)
+        bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
 
+      when 'GetInfo'
+        error_message = "Good your data are: "
+        response = RestClient.get 'https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/'+$id_Person.to_s
+        person = JSON.parse(response)
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
+        text = error_message+person['firstname']+' '+person['lastname']+'. How are you?'
+        bot.api.send_message(chat_id: message.chat.id, text: text , reply_markup: kb)
+
+
+      when /u \d+/
+        id = message.text.match(/\d+/)[0].to_i
+        puts id.to_s
+        if id > 5
+          id = 5
+        end
+        response = RestClient.get 'https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/'+id.to_s
+        person = JSON.parse(response)
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+        text = 'Hi '+person['firstname']+' '+person['lastname']+', how are you?'
+        bot.api.send_message(chat_id: message.chat.id, text: text , reply_markup: kb)
+
+      when 'ShowListTarget'
+        if $id_Person != 0
+          puts 'ShowListTarget...'
+          obj_person = Person.new
+          kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
+          bot.api.send_message(chat_id: message.chat.id, text: obj_person.ShowListTarget($id_Doctor), reply_markup: kb)
+        end
+
+      #####################LOGIN########################
 			when /(User|Family|Doctor)/
 				kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
 				case message.text
@@ -229,11 +279,9 @@
             #x = 'd'
 
 				end
-				#text = 'Ok, you are a '+message.text+'!! Insert '+x+' and your id. e.g '+x+' 1 '
-				#bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
 
-
-      when /p= \d+/
+      #Check id for person
+      when /p=\d+/
         id = message.text.match(/\d+/)[0].to_i
         $id_Person = id
         puts "Id person: " + $id_Person.to_s
@@ -244,10 +292,11 @@
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         else
           welcome_person = "Push getInfo button to receive last info about you"
-          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(GetInfo)], one_time_keyboard: true)
+          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [['GetInfo', 'p -show', '/help -p'], ['ShowListTarget', ''], one_time_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
+       #Check id for doctor
       when /d=\d+/
         id = message.text.match(/\d+/)[0].to_i
         $id_Doctor = id
@@ -259,10 +308,11 @@
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         else
           welcome_person = "Choose an action!"
-          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(CheckPatient), %w(list_patients)], one_time_keyboard: true)
+          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(CheckPatient), %w(list_patients)], one_time_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
+      #Check id for family
       when /f=\d+/
         id = message.text.match(/\d+/)[0].to_i
         $id_Family = id
@@ -274,38 +324,13 @@
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         else
           welcome_person = "Choose an action"
-          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(visualize_data), %w(receive_allarm)], one_time_keyboard: true)
+          answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(visualize_data), %w(receive_allarm)], one_time_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
 
-      when 'Person'
-				welcome_person = "Push getInfo button to receive last info about you"
-        answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(GetInfo)], one_time_keyboard: true)
-				bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
-
-      when 'GetInfo'
-        error_message = "Good your data are: "
-        response = RestClient.get 'https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/'+$id_Person.to_s
-        person = JSON.parse(response)
-        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
-        text = error_message+person['firstname']+' '+person['lastname']+'. How are you?'
-        bot.api.send_message(chat_id: message.chat.id, text: text , reply_markup: kb)
-
-
-			when /u \d+/
-				id = message.text.match(/\d+/)[0].to_i
-				puts id.to_s
-				if id > 5
-					id = 5
-				end
-				response = RestClient.get 'https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/'+id.to_s
-				person = JSON.parse(response)
-				kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: true)
-				text = 'Hi '+person['firstname']+' '+person['lastname']+', how are you?'
-				bot.api.send_message(chat_id: message.chat.id, text: text , reply_markup: kb)
-
-      #***************FAMILY****************
+    
+      #####################FAMILY########################
       when 'visualize_data'
         if $id_Family != 0
             puts 'visualize_data'
@@ -324,7 +349,7 @@
             bot.api.send_message(chat_id: message.chat.id, text: obj_family.getAlarms($id_Family), reply_markup: kb)
         end
 
-      #***************DOCTOR****************
+      #####################DOCTOR#####################
 
       when 'list_patients'
         if $id_Doctor != 0
