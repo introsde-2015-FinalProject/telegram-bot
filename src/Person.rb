@@ -2,6 +2,7 @@ class Person
   def initialize
     @bls_addr = "https://bls-desolate-falls-2352.herokuapp.com/sdelab/person/"
     @bls_addr_measure = "https://bls-desolate-falls-2352.herokuapp.com/sdelab/measureDefinition"
+    @pcs_addr = "https://pcs-nameless-cove-5229.herokuapp.com/sdelab/person/"
   end
 
 
@@ -204,6 +205,31 @@ class Person
 
     return text
   end
+
+
+  public
+  def createMeasure(personId,idMeasure,value)
+
+    addr = @pcs_addr.to_s+personId.to_s+"/measure"
+    puts addr
+    puts "Inside the method inserNew Measure !!! "
+    response = RestClient.get addr, :params => {:measure => idMeasure, :value => value}
+    result = JSON.parse(response)
+
+    puts "Result json"+result.to_s
+    x=result['currentHealth']
+    y=x['measure']
+
+
+
+    text = result['phrase'].to_s+"\n"
+    y.each do |el|
+      text << "\n Measure name: "+el['measureDefinition']['measureName'].to_s+"\n Value: "+el['value'].to_s + " \n "
+    end
+
+    return text
+  end
+
 
   def bls_addr
     @bls_addr

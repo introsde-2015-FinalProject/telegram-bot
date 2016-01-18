@@ -7,8 +7,8 @@
   require_relative 'Doctor'
   require_relative 'Family'
 
-	#token = '177899404:AAGAOaYV8QXTFIkQTRsPTxaBcAlA-Upb31g' #lifecoach
-  token = '160006993:AAGLTK3ZWLi4iHTMzZrNzSqVkQ9kkJSL5iA' # andrea
+	token = '177899404:AAGAOaYV8QXTFIkQTRsPTxaBcAlA-Upb31g' #lifecoach
+
   $id_Person = 0
   $id_Doctor = 0
   $id_Family = 0
@@ -228,6 +228,23 @@
         kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
         bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
 
+
+     #Get Motivation Phrase
+      when /p\s-newMeasure/
+        b=message.text.gsub(/\s+/m, ' ').strip.split(" ")
+        idMeasureDef = b[2]
+        value = b[3]
+
+        if $id_Person == 0
+           $id_Person = 1
+        end
+
+        obj_person = Person.new()
+        text = obj_person.createMeasure($id_Person,idMeasureDef,value)
+        puts text.to_s
+        kb = Telegram::Bot::Types::ReplyKeyboardHide.new(hide_keyboard: false)
+        bot.api.send_message(chat_id: message.chat.id, text: text, reply_markup: kb)
+
     #Get Motivation Phrase
         when /p\s-currentHealth/
           if $id_Person == 0
@@ -329,7 +346,8 @@
           welcome_person = "Push getInfo button to receive last info about you"
           answers_user = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [['GetInfo', '/help -p'], 
                                                                                 ['showTarget', 'showReminder',  'p -show'],
-                                                                                ['p -getMotivation', 'p -currentHealth']], one_time_keyboard: false)
+                                                                                ['p -getMotivation', 'p -currentHealth'],
+                                                                                  ['p -createTarget', 'p -createReminder']], one_time_keyboard: false)
           bot.api.send_message(chat_id: message.chat.id, text: welcome_person, reply_markup: answers_user)
         end
 
